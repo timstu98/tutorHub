@@ -1,19 +1,14 @@
 import { NextResponse } from 'next/server';
-import clientPromise from "../../lib/mongodb";
+import clientPromise from "../../../lib/mongodb";
  
 export async function GET(request: Request) {
 
     try {
       const client = await clientPromise;
-      const db = client.db("tutorHub");
+      const db = await client.db("tutorHub");
   
-      const res = await db.collection("lessons").find({}).limit(20).toArray();
-      console.log(typeof res)
-      const lessons = res.json();
-      console.log(typeof res)
-      console.log(NextResponse.json({ lessons }))
-
-      return NextResponse.json({ lessons });
+      const res = await db.collection("lessons").find({}).map(lesson => ({ ...lesson, _id: lesson._id.toString() })).toArray();
+      return NextResponse.json({lessons:res})
     } catch (e) {
         console.error(e);
         throw new Error(e).message;
